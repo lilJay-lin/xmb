@@ -39,8 +39,9 @@ Router.post('/', (req, res) => {
     let {username, password} = req.body
     let user = new User({username, password})
     user.save((err, user) => {
+        console.log(err)
         if (err) {
-            return res.end(err)
+            return res.end('保存失败')
         }
         res.json({message: 'user created', user: user})
     })
