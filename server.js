@@ -8,7 +8,6 @@ let mongoose = require('mongoose')
 let jwt = require('express-jwt')
 let config = require('./config')
 let http = require('http')
-let dbHelper = require('./helpers/dbHelper')
 
 let db = mongoose.connection
 
@@ -19,7 +18,6 @@ db.once('open', function() {
     // we're connected!
     console.log('mongodb is connected')
 });
-mongoose.Error.messages = dbHelper.customizeError()
 
 //port
 let port = process.env.port || 8080

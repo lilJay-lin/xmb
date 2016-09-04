@@ -5,32 +5,55 @@ let mongoose = require('mongoose')
 let Schema = mongoose.Schema
 let bcrypt = require('bcryptjs')
 let config = require('../config')
-let dbHelper = require('../helpers/dbHelper')
+let dbHelper = require('../helpers/dbValidate')
 
 /*
-*文档定义
-* match: [regex, msg]
-* enum: {values, message}
-* 实用类：trim,lowercase,uppercase
-* */
+ *文档定义
+ * match: [regex, msg]
+ * enum: {values, message}
+ * 实用类：trim,lowercase,uppercase
+ * */
 let UserSchema = new Schema({
-    username: {type: String, required: true, unique: true},
-    password: {type: String, required: true, match: [/^\d+$/g, '密码只能由数字组成']}
+    username: {type: String},
+    password: {type: String}
 })
-let validate = dbHelper.validateMethod(UserSchema)
-
-
 let UserModel = mongoose.model('User', UserSchema)
 
 /*
-* 数据校验
-* 1. 使用schema的默认校验，校验信息格式在dbHelper.customizeError中定义
-* */
+ * 数据校验
+ * 1. 使用schema的默认校验，校验信息格式在dbHelper.customizeError中定义
+ * */
+let validateConfig = {
+    password: [
+        {
+            method: 'required',
+            message: '密码不能为空',
+        },
+        {
+            method: 'checkLen',
+            min: 8,
+            max: 20,
+            message: '密码长度8到20位'
+        }
+    ],
+    username:[
+        {
+            method: 'required',
+            message: '用户名不能为空',
+        },
+        {
+            method: 'unique',
+            message: '用户已经存在',
+            model: UserModel
+        }
+    ],
+}
+dbHelper.setValidateStrange(UserSchema, validateConfig)
 
 /*
-* 保存之前做密码hash加盐
-* */
-UserSchema.pre('save', function (next) {
+ * 保存之前做密码hash加盐
+ * */
+UserSchema.pre('save', function (next, err) {
     let user = this
     if (!user.isModified('password')) {
         return next()
@@ -50,8 +73,8 @@ UserSchema.pre('save', function (next) {
 })
 
 /*
-* 密码匹配
-* */
+ * 密码匹配
+ * */
 UserSchema.methods.comparePassword = (password, cb) => {
     bcrypt.compare(password, this.password, (err, isMatch) => {
         if (err) {

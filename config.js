@@ -3,5 +3,11 @@
  */
 module.exports = {
     SALT_FACTOR: 10,
-    SECRET_TOKEN: 'TEST_JWT'
+    SECRET_TOKEN: 'TEST_JWT',
+    ERROR_CODE: {
+        DB_VALIDATE_FAIL: -1
+    },
+    ERROR_MESSAGE: {
+        VALIDATE_ERROR_MESSAGE: '数据校验失败'
+    }
 }

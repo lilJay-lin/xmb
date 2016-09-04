@@ -1,35 +1,24 @@
 /**
- * Created by linxiaojie on 2016/9/2.
+ * Created by liljay on 2016/9/4.
  */
+let config = require('../config')
 let _ = require('lodash')
-function validateMethod (schema) {
-    return (path, cb, errorMsg) => {
-        schema.path(path).validate(cb, errorMsg)
+function validateError (err) {
+    if (err.name === 'ValidationError') {
+        let error = {}
+        _.forEach(err.errors, (e) => {
+            error[e.path] = e.message
+        })
+        return {
+            status: config.ERROR_CODE.DB_VALIDATE_FAIL,
+            res: null,
+            error,
+            message: config.ERROR_MESSAGE.VALIDATE_ERROR_MESSAGE
+        }
+    } else {
+        return err
     }
 }
-
-function required (path) {
-    return (value) => {
-        return !_.isEmpty(value)
-    }
-}
-
-function customizeError () {
-    let msg = {};
-    msg.general = {};
-    msg.general.default = "Validator failed for path `{PATH}` with value `{VALUE}`";
-    msg.general.required = "Path `{PATH}` is required.";
-    msg.Number = {};
-    msg.Number.min = "Path `{PATH}` ({VALUE}) is less than minimum allowed value ({MIN}).";
-    msg.Number.max = "Path `{PATH}` ({VALUE}) is more than maximum allowed value ({MAX}).";
-    msg.String = {};
-    msg.String.enum = "`{VALUE}` is not a valid enum value for path `{PATH}`.";
-    msg.String.match = "Path `{PATH}` is invalid ({VALUE}).";
-    return msg
-}
-
-
 module.exports = {
-    validateMethod,
-    customizeError
+    validateError
 }

@@ -6,6 +6,7 @@ let jwt = require('jsonwebtoken')
 let Router = express.Router()
 let config = require('../config')
 let User = require('../models/user')
+let dbHelper = require('../helpers/dbHelper')
 
 Router.post('/login', (req, res) => {
     let username = req.body.username
@@ -39,9 +40,8 @@ Router.post('/', (req, res) => {
     let {username, password} = req.body
     let user = new User({username, password})
     user.save((err, user) => {
-        console.log(err)
         if (err) {
-            return res.end('保存失败')
+            return res.json(dbHelper.validateError(err))
         }
         res.json({message: 'user created', user: user})
     })
