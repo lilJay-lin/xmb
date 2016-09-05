@@ -2,22 +2,22 @@
  * Created by liljay on 2016/9/4.
  */
 let config = require('../config')
+let common = require( './common')
 let _ = require('lodash')
-function validateError (err) {
+const validateError = (err) => {
+    let status, res =  null, error = {}, message
     if (err.name === 'ValidationError') {
-        let error = {}
         _.forEach(err.errors, (e) => {
             error[e.path] = e.message
         })
-        return {
-            status: config.ERROR_CODE.DB_VALIDATE_FAIL,
-            res: null,
-            error,
-            message: config.ERROR_MESSAGE.VALIDATE_ERROR_MESSAGE
-        }
+        status = config.ERROR_CODE.DB_VALIDATE_FAIL
+        message = config.ERROR_MESSAGE.VALIDATE_ERROR_MESSAGE
     } else {
-        return err
+        status = err.errorCode || config.ERROR_CODE.DEFAULT_ERROR
+        error = err
+        message = error.message
     }
+    return common.setResult({status, res, error, message})
 }
 module.exports = {
     validateError

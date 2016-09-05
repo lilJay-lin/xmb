@@ -5,7 +5,7 @@ let mongoose = require('mongoose')
 let Schema = mongoose.Schema
 let bcrypt = require('bcryptjs')
 let config = require('../config')
-let dbHelper = require('../helpers/dbValidate')
+let dbValidate = require('../helpers/dbValidate')
 
 /*
  *文档定义
@@ -48,7 +48,7 @@ let validateConfig = {
         }
     ],
 }
-dbHelper.setValidateStrange(UserSchema, validateConfig)
+dbValidate.setValidateStrange(UserSchema, validateConfig)
 
 /*
  * 保存之前做密码hash加盐

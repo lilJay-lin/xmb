@@ -3,15 +3,15 @@
  */
 let express = require('express')
 let jwt = require('jsonwebtoken')
-let Router = express.Router()
 let config = require('../config')
-let User = require('../models/user')
-let dbHelper = require('../helpers/dbHelper')
+let dbHelper = require( '../helpers/dbHelper')
+let UserModel= require('../models/user')
+let Router = express.Router()
 
 Router.post('/login', (req, res) => {
     let username = req.body.username
     let password = req.body.password
-    User.findOne({username}, (err, user) => {
+    UserModel.findOne({username}, (err, user) => {
         if (err) {
             res.end(err)
         }
@@ -38,7 +38,7 @@ Router.post('/logout', (req, res) => {
 
 Router.post('/', (req, res) => {
     let {username, password} = req.body
-    let user = new User({username, password})
+    let user = new UserModel({username, password})
     user.save((err, user) => {
         if (err) {
             return res.json(dbHelper.validateError(err))
@@ -48,7 +48,7 @@ Router.post('/', (req, res) => {
 })
 
 Router.get('/', (req, res) => {
-    User.find((err, users) => {
+    UserModel.find((err, users) => {
         if (err) {
             return res.end(err)
         }

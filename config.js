@@ -5,6 +5,7 @@ module.exports = {
     SALT_FACTOR: 10,
     SECRET_TOKEN: 'TEST_JWT',
     ERROR_CODE: {
+        DEFAULT_ERROR: -2,
         DB_VALIDATE_FAIL: -1
     },
     ERROR_MESSAGE: {
