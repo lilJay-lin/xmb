@@ -6,6 +6,7 @@ let jwt = require('jsonwebtoken')
 let config = require('../config')
 let dbHelper = require( '../helpers/dbHelper')
 let UserModel= require('../models/user')
+let common = require( '../helpers/common')
 let Router = express.Router()
 
 Router.post('/login', (req, res) => {
@@ -36,6 +37,9 @@ Router.post('/logout', (req, res) => {
 })
 
 
+/*
+* 新增用户
+* */
 Router.post('/', (req, res) => {
     let {username, password} = req.body
     let user = new UserModel({username, password})
@@ -43,7 +47,17 @@ Router.post('/', (req, res) => {
         if (err) {
             return res.json(dbHelper.validateError(err))
         }
-        res.json({message: 'user created', user: user})
+        res.json(common.getResponse({okMsg: '用户新增成功', res: user}))
+    })
+})
+
+/*
+* 更新用户
+* */
+Router.put('/', (req, res) => {
+    let {username, password, _id} = req.body
+    UserModel.findByIdAndUpdate(_id, {$set: {username, password}}, (err, user) => {
+        res.json(common.setResult({err, okMsg: '用户修改成功', errMsg: '用户修改失败', res: user._id}))
     })
 })
 

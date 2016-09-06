@@ -10,10 +10,10 @@ const validateError = (err) => {
         _.forEach(err.errors, (e) => {
             error[e.path] = e.message
         })
-        status = config.ERROR_CODE.DB_VALIDATE_FAIL
+        status = config.RESPONSE_CODE.DB_VALIDATE_FAIL
         message = config.ERROR_MESSAGE.VALIDATE_ERROR_MESSAGE
     } else {
-        status = err.errorCode || config.ERROR_CODE.DEFAULT_ERROR
+        status = err.errorCode || config.RESPONSE_CODE.DEFAULT_ERROR
         error = err
         message = error.message
     }

@@ -50,8 +50,7 @@ server.on('error', (error) => {
 })
 
 /*
-* 未捕获异常处理，重启服务
-* TODO: 开多进程domain-middleware
+* 未捕获异常处理
 * */
 process.on('uncaughtException', function (err) {
     console.log(err.stack)
