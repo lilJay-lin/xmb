@@ -8,12 +8,14 @@ module.exports =  {
         return {status, res, error, message}
     },
     getResponse ({err, res, okMsg, errMsg}) {
-        let status
+        let status, message
         if (err) {
+            message = errMsg
             status = err.errorCode || config.RESPONSE_CODE.DEFAULT_ERROR
         } else {
+            message = okMsg
             status = config.RESPONSE_CODE.SUCCESS_CODE
         }
-        return this.setResult({status, res, error, message})
+        return this.setResult({status, res, err, message})
     }
 }

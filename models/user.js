@@ -14,8 +14,18 @@ let dbValidate = require('../helpers/dbValidate')
  * 实用类：trim,lowercase,uppercase
  * */
 let UserSchema = new Schema({
-    username: {type: String},
-    password: {type: String}
+    userName: String,
+    loginName: String,
+    password: String,
+    description: String,
+    status: {type: Boolean, default: true},
+    email: String,
+    roles: [{type: Schema.Types.ObjectId, ref: 'Role'}]
+},{
+    timestamps: {
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
+    }
 })
 let UserModel = mongoose.model('User', UserSchema)
 
@@ -36,7 +46,23 @@ let validateConfig = {
             message: '密码长度8到20位'
         }
     ],
-    username:[
+    loginName: [
+        {
+            method: 'required',
+            message: '登录名不能为空',
+        },
+        {
+            method: 'match',
+            regex: /^[0-9_a-zA-Z]{6,20}$/,
+            message: '登录名只能为数字、字母和下划线组成，长度6到20位',
+        }
+    ],
+    email: {
+        method: 'match',
+        regex: /^\w+(\.\w+)*@\w+(\.\w+)+$/,
+        message: '邮箱格式不正确'
+    },
+    userName:[
         {
             method: 'required',
             message: '用户名不能为空',
@@ -45,6 +71,12 @@ let validateConfig = {
             method: 'unique',
             message: '用户已经存在',
             model: UserModel
+        },
+        {
+            method: 'checkLen',
+            min: 2,
+            max: 10,
+            message: '用户名称长度2到10位'
         }
     ],
 }

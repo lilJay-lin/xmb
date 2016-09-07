@@ -23,6 +23,12 @@ module.exports = {
                 if (!_.isFunction(param.cb)) {
                     throw new Error('校验方法不存在:' + method)
                 }
+                /*
+                * 特效处理，required的属性如果保存的对象不存在key,schema不会做path校验
+                * */
+                if (method === 'required') {
+
+                }
                 exec(param)
             })
         })
@@ -32,6 +38,7 @@ module.exports = {
      * */
     required () {
         return (value) => {
+            console.log('value: ' + value)
             return !_.isEmpty(value)
         }
     },

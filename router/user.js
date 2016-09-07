@@ -10,15 +10,15 @@ let common = require( '../helpers/common')
 let Router = express.Router()
 
 Router.post('/login', (req, res) => {
-    let username = req.body.username
+    let userName = req.body.userName
     let password = req.body.password
-    UserModel.findOne({username}, (err, user) => {
+    UserModel.findOne({userName}, (err, user) => {
         if (err) {
             res.end(err)
         }
         user.comparePassword(password, (isMatch) => {
             if (!isMatch) {
-                console.log("Attempt failed to login with " + user.username);
+                console.log("Attempt failed to login with " + user.userName);
                 return res.send(401);
             }
             let token = jwt.sign({user: user}, config.SECRET_TOKEN, {expiresIn: 60 * 60});
@@ -41,9 +41,9 @@ Router.post('/logout', (req, res) => {
 * 新增用户
 * */
 Router.post('/', (req, res) => {
-    let {username, password} = req.body
-    let user = new UserModel({username, password})
-    user.save((err, user) => {
+    let {user} = req.body
+    let userEntity = new UserModel(user)
+    userEntity.save((err, user) => {
         if (err) {
             return res.json(dbHelper.validateError(err))
         }
@@ -55,18 +55,17 @@ Router.post('/', (req, res) => {
 * 更新用户
 * */
 Router.put('/', (req, res) => {
-    let {username, password, _id} = req.body
-    UserModel.findByIdAndUpdate(_id, {$set: {username, password}}, (err, user) => {
+    let {user} = req.body
+    let _id = user._id
+    delete user._id
+    UserModel.findByIdAndUpdate(_id, {$set: user}, (err, user) => {
         res.json(common.setResult({err, okMsg: '用户修改成功', errMsg: '用户修改失败', res: user._id}))
     })
 })
 
 Router.get('/', (req, res) => {
     UserModel.find((err, users) => {
-        if (err) {
-            return res.end(err)
-        }
-        res.json(users)
+        res.json(common.setResult({err, okMsg: '用户搜索成功', errMsg: '用户搜索失败', res: {list: users}}))
     })
 })
 
