@@ -19,15 +19,14 @@ let RoleSchema = new Schema({
 
 let RoleModel = mongoose.model('Role', RoleSchema)
 
+/*
+* 表校验
+* */
 dbValidate.setValidateStrange(RoleSchema, {
     name: [
         {
             method: 'required',
-            message: '角色名称不能为空',
-            status: {
-                type: Number,
-                default: 1
-            }
+            message: '角色名称不能为空'
         },
         {
             method: 'checkLen',
@@ -37,5 +36,13 @@ dbValidate.setValidateStrange(RoleSchema, {
         }
     ]
 })
+
+/*
+* 保存角色和关联的权限
+* */
+/*RoleSchema.pre('save', function (next) {
+    let role = this
+    let permissions = role.permissions || []
+})*/
 
 module.exports = RoleModel

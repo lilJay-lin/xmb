@@ -8,6 +8,7 @@ let dbHelper = require( '../helpers/dbHelper')
 let UserModel= require('../models/user')
 let common = require( '../helpers/common')
 let Router = express.Router()
+let _ = require('lodash')
 
 Router.post('/login', (req, res) => {
     let userName = req.body.userName
@@ -38,35 +39,75 @@ Router.post('/logout', (req, res) => {
 
 
 /*
-* 新增用户
-* */
+ * 新增用户
+ * */
 Router.post('/', (req, res) => {
-    let {user} = req.body
-    let userEntity = new UserModel(user)
-    userEntity.save((err, user) => {
+    let {user = {}} = req.body
+    let users = user.users || []
+    UserModel.create(user, (err, user) => {
         if (err) {
             return res.json(dbHelper.validateError(err))
         }
-        res.json(common.getResponse({okMsg: '用户新增成功', res: user}))
+        res.json(common.getResponse({okMsg: '用户新增成功', res: {user}}))
     })
 })
 
 /*
-* 更新用户
-* */
-Router.put('/', (req, res) => {
-    let {user} = req.body
-    let _id = user._id
+ * 批量更新用户
+ * */
+Router.put('/batch', (req, res) => {
+    let {user = {}, ids} = req.body
+    ids = ids && _.isArray(ids) ? ids : [ids]
     delete user._id
-    UserModel.findByIdAndUpdate(_id, {$set: user}, (err, user) => {
-        res.json(common.setResult({err, okMsg: '用户修改成功', errMsg: '用户修改失败', res: user._id}))
+    UserModel.update({_id: {$in: ids}}, {$set: user}, { multi: true }, (err, result = {ok: 0}) => {
+        res.json(common.getResponse({err, okMsg: '用户批量修改成功', errMsg: '用户批量修改失败', res: {count: result.ok}}))
     })
 })
 
-Router.get('/', (req, res) => {
-    UserModel.find((err, users) => {
-        res.json(common.setResult({err, okMsg: '用户搜索成功', errMsg: '用户搜索失败', res: {list: users}}))
+/*
+ * 更新用户
+ * */
+Router.put('/:id', (req, res) => {
+    let {user = {}} = req.body
+    let _id = req.params.id
+    delete user._id
+    UserModel.findByIdAndUpdate(_id, {$set: user}, (err, result = {ok: 0}) => {
+        res.json(common.getResponse({err, okMsg: '用户修改成功', errMsg: '用户修改失败', res: {count: result.ok}}))
     })
 })
+
+/*
+ * 搜索全部用户
+ * */
+Router.get('/', (req, res) => {
+    let name = req.query.name
+    let query = {status: true}
+    !_.isEmpty(name) && (query.name = {$regex: name})
+    UserModel.find(query, (err, users) => {
+        res.json(common.getResponse({err, okMsg: '用户搜索成功', errMsg: '用户搜索失败', res: {data: users}}))
+    })
+})
+
+/*
+ * 获取指定用户详情
+ * */
+Router.get('/:id', (req, res) => {
+    let id = req.params.id
+    UserModel.findOne({_id: id}).populate('roles').exec((err, user) => {
+        res.json(common.getResponse({err, okMsg: '获取用户详情成功', errMsg: '获取用户详情失败', res: {data: user}}))
+    })
+})
+
+/*
+ * 根据ids删除用户
+ * */
+Router.delete('/:ids', (req, res) => {
+    let ids = (req.params.ids || '').split(',')
+    UserModel.update({_id: {$in: ids}}, {$set: {status: false}}, { multi: true }, (err, result = {ok: 0}) => {
+        res.json(common.getResponse({err, okMsg: '用户修改成功', errMsg: '用户修改失败', res: {count: result.ok}}))
+    })
+})
+
+module.exports = Router
 
 module.exports = Router

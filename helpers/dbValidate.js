@@ -13,6 +13,7 @@ module.exports = {
     setValidateStrange (schema, cfg) {
         let me = this
         let exec = me._validateMethod(schema)
+        let requiredProps = []
         _.forEach(cfg, (validator, key) => {
             let validators = _.isArray(validator) ? validator : [validator]
             _.forEach(validators, (param) => {
@@ -23,14 +24,26 @@ module.exports = {
                 if (!_.isFunction(param.cb)) {
                     throw new Error('校验方法不存在:' + method)
                 }
-                /*
-                * 特效处理，required的属性如果保存的对象不存在key,schema不会做path校验
-                * */
                 if (method === 'required') {
-
+                    requiredProps.push(key)
                 }
                 exec(param)
             })
+        })
+        me.preValidate(schema, requiredProps)
+    },
+    /*
+    * path阶段校验，不会校验保存对象中不存在的属性,增加pre('save')做校验
+    * */
+    preValidate (schema, props) {
+        schema.pre('validate', function (next) {
+            let entity = this
+            _.forEach(props, (prop) => {
+                if (entity[prop] === undefined) {
+                    entity[prop] = null
+                }
+            })
+            next()
         })
     },
     /*
@@ -38,7 +51,6 @@ module.exports = {
      * */
     required () {
         return (value) => {
-            console.log('value: ' + value)
             return !_.isEmpty(value)
         }
     },
